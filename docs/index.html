@@ -105,14 +105,13 @@ body{
   display:inline-flex;align-items:center;gap:8px;cursor:pointer;white-space:nowrap;
   transition:background-color .2s, color .2s;
 }
-.bar button:hover{background:rgba(238,243,239,.1)}
 .bar button.on{background:var(--lantern);color:var(--lantern-ink)}
 .bar svg{width:19px;height:19px;flex:none}
 #soundIcon{display:flex}
 button:focus-visible,input:focus-visible{outline:2px solid var(--lantern);outline-offset:2px}
 
 body.calm .top,body.calm .bar{opacity:.4}
-body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
+body.calm .bar:has(:focus-visible){opacity:1}
 
 .panel{
   position:fixed;left:50%;transform:translateX(-50%);
@@ -133,7 +132,6 @@ body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
   border:1px solid var(--line);background:transparent;color:var(--ink);
   font:500 14px/1 var(--font-ui);cursor:pointer;transition:background-color .2s, color .2s, border-color .2s;
 }
-.seg button:hover{background:rgba(238,243,239,.08)}
 .seg button[aria-pressed="true"]{background:var(--lantern);border-color:var(--lantern);color:var(--lantern-ink)}
 .range-row{display:flex;align-items:center;gap:12px}
 .range-row input{flex:1;min-width:0;height:28px;accent-color:var(--lantern);margin:0}
@@ -144,7 +142,6 @@ body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
   appearance:none;border:0;min-height:44px;border-radius:12px;cursor:pointer;
   background:rgba(238,243,239,.12);color:var(--ink);font:600 15px/1 var(--font-ui);
 }
-.done:hover{background:rgba(238,243,239,.2)}
 .panel h2{margin:0;font-family:var(--font-display);font-weight:600;font-size:21px;letter-spacing:.03em;text-wrap:balance}
 .panel .lede{margin:-8px 0 0;font-size:15px;line-height:1.5;color:var(--ink)}
 .panel textarea{
@@ -179,7 +176,6 @@ body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
   border:1px solid var(--line);background:var(--glass);color:var(--ink);font:500 14px/1 var(--font-ui);cursor:pointer;
   -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
 }
-.breath button:hover{background:rgba(238,243,239,.14)}
 
 .toast{
   position:fixed;left:0;right:0;top:calc(env(safe-area-inset-top,0px) + 86px);margin:0;
@@ -201,15 +197,31 @@ body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
   appearance:none;border:0;min-height:40px;padding:0 16px;border-radius:999px;cursor:pointer;
   background:rgba(238,243,239,.14);color:var(--ink);font:600 14px/1 var(--font-ui);
 }
-.sleepchip button:hover{background:rgba(238,243,239,.22)}
 .field .primary{margin-top:2px}
 body.sleeping .top,body.sleeping .bar,body.sleeping .toast{opacity:0 !important;pointer-events:none}
 body.sleeping .top,body.sleeping .bar{transition:opacity 2.5s ease}
 #pond.feeding{cursor:crosshair}
 
+/* Hover looks only for real mouse pointers: on phones a tapped button would otherwise stay grey. */
+@media (hover:hover) and (pointer:fine){
+  .bar button:not(.on):hover{background:rgba(238,243,239,.1)}
+  body.calm .bar:hover{opacity:1}
+  .seg button[aria-pressed="false"]:hover{background:rgba(238,243,239,.08)}
+  .done:hover{background:rgba(238,243,239,.2)}
+  .breath button:hover{background:rgba(238,243,239,.14)}
+  .sleepchip button:hover{background:rgba(238,243,239,.22)}
+}
+
+/* Phones: six equal columns with the icon above the label, so every button gets the same space. */
 @media (max-width:560px){
-  .bar{border-radius:22px;gap:2px}
-  .bar button{flex-direction:column;gap:4px;min-height:54px;min-width:52px;padding:0 4px;font-size:11px;border-radius:16px}
+  .bar{
+    display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;
+    width:min(calc(100vw - 32px), 400px);box-sizing:border-box;border-radius:22px;
+  }
+  .bar button{
+    flex-direction:column;justify-content:center;gap:5px;
+    min-height:56px;min-width:0;padding:0 2px;font-size:11px;border-radius:16px;
+  }
   .panel{bottom:calc(env(safe-area-inset-bottom,0px) + 98px)}
 }
 @media (prefers-reduced-motion: reduce){
