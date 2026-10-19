@@ -1,0 +1,89 @@
+{
+  "id": "./",
+  "name": "Ripple Pond",
+  "short_name": "Ripple Pond",
+  "description": "A calm koi pond to relax in: tap for ripples and gentle notes, feed the koi, breathe with a lotus, let worries drift away, or fall asleep to it.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#06121c",
+  "theme_color": "#06121c",
+  "categories": [
+    "games",
+    "health",
+    "lifestyle"
+  ],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshots/narrow-1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Tap the water: ripples spread and the koi gather"
+    },
+    {
+      "src": "screenshots/narrow-2.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Breathe with the Pond: follow the lotus as it opens and closes"
+    },
+    {
+      "src": "screenshots/narrow-3.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Let go: a paper boat carries your worry away"
+    },
+    {
+      "src": "screenshots/narrow-4.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Night pond with moonlight, fireflies and the frog"
+    },
+    {
+      "src": "screenshots/wide-1.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Feeding the koi on a sunny afternoon"
+    },
+    {
+      "src": "screenshots/wide-2.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Breathe with the Pond under the night sky"
+    }
+  ]
+}

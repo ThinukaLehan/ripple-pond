@@ -17,6 +17,15 @@ Replace the drawn ripple rings with a real water surface, so ripples bend everyt
 - [ ] Calmer, lighter simulation in sleep mode (battery) and gentler distortion with reduced motion
 - [ ] Test on low-power phones, all times of day, rain, every mode, and the fallback
 
+### Publishing (see PUBLISHING.md)
+- [x] Website on GitHub Pages
+- [x] Installable web app with offline play, bundled fonts, icons, screenshots, privacy policy
+- [ ] itch.io page
+- [ ] Microsoft Store (PWABuilder)
+- [ ] Google Play (PWABuilder, assetlinks.json on ThinukaLehan.github.io, 12 testers for 14 days)
+- [ ] Check that the name "Ripple Pond" is free in each store before submitting
+- [ ] Apple App Store (later)
+
 ## Ideas
 
 ### Rare magical moments

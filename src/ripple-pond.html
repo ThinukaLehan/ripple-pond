@@ -103,6 +103,7 @@ body.calm .bar:hover,body.calm .bar:focus-within{opacity:1}
 .range-row input{flex:1;min-width:0;height:28px;accent-color:var(--lantern);margin:0}
 .range-row output{width:3ch;text-align:right;font-size:13px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
 .note{margin:0;font-size:13px;line-height:1.45;color:var(--ink-soft)}
+.note a{color:var(--lantern)}
 .done{
   appearance:none;border:0;min-height:44px;border-radius:12px;cursor:pointer;
   background:rgba(238,243,239,.12);color:var(--ink);font:600 15px/1 var(--font-ui);
@@ -255,6 +256,7 @@ body.sleeping .top,body.sleeping .bar{transition:opacity 2.5s ease}
     <button type="button" class="primary" id="btnSleepStart">Start sleep mode</button>
   </div>
   <p class="note">No sound on iPhone? Switch off silent mode, then tap the water again.</p>
+  <p class="note">Ripple Pond collects nothing about you. <a href="https://thinukalehan.github.io/ripple-pond/privacy.html" target="_blank" rel="noopener">Privacy policy</a></p>
   <button type="button" class="done" id="btnDone">Done</button>
 </section>
 
@@ -1108,7 +1110,7 @@ function updateTimeLabel() {
     try { ts = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); } catch (e) { ts = now.getHours() + ':' + String(now.getMinutes()).padStart(2, '0'); }
     timeLabel.textContent = partName(clockHour()) + ' · ' + ts;
   } else {
-    timeLabel.textContent = MODE_NAMES[settings.timeMode] + ' · chosen in Settings';
+    timeLabel.textContent = MODE_NAMES[settings.timeMode];
   }
 }
 function setSheet(name) {

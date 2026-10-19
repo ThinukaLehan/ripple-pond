@@ -2,6 +2,12 @@
 
 A calm koi pond for the browser. Tap the water and watch ripples spread while soft notes play. There is no score, no timer and no way to lose. It is made for anyone who wants a few quiet minutes, on a phone or a computer.
 
+**Play it: https://thinukalehan.github.io/ripple-pond/**
+
+It installs like an app (on a phone: browser menu → *Add to Home Screen*; on a computer: the install icon in the address bar) and works offline after the first visit.
+
+![Ripple Pond on a sunny afternoon](assets/screenshots/wide-1.png)
+
 ## How to play
 
 | Do this | What happens |
@@ -28,38 +34,51 @@ A calm koi pond for the browser. Tap the water and watch ripples spread while so
 - **Sound**: four note styles (Chimes, Kalimba, Singing bowl, Water drops), all in a pentatonic scale so any tapping sounds musical. Gentle water sounds, birds by day, crickets and a distant frog chorus at night.
 - **Sleep mode**: 15, 30 or 60 minutes. The pond plays by itself, the screen dims, the sound fades out at the end, and the screen stays awake until the timer ends.
 
-All sound is generated in the browser. There are no audio or image files. Settings are remembered in your browser only.
-
-## Running it
-
-Open `dist/index.html` in a browser. That's it: it is one self-contained file.
-
-To host it, upload `dist/index.html` to any static host, for example GitHub Pages, Netlify or Cloudflare Pages.
+All sound is generated in the browser, so there are no audio files. Settings are remembered in your browser only, and the game collects nothing ([privacy policy](https://thinukalehan.github.io/ripple-pond/privacy.html)).
 
 On iPhone, sound only plays when silent mode is off. Browsers start sound only after the first tap.
+
+## Running it locally
+
+The built website is in `docs/`. Serve that folder with any local web server, for example:
+
+```
+python -m http.server 8000 --directory docs
+```
+
+then open http://localhost:8000. Opening `docs/index.html` directly also works, but offline mode and installing need a web server.
 
 ## Project layout
 
 ```
-src/ripple-pond.html   The game: one file with styles, markup and script.
-scripts/build.mjs      Wraps the source into a complete page at dist/index.html.
-dist/index.html        The built, playable page (committed so the repo is playable as-is).
-tests/smoke_test.py    Plays through every feature in a headless browser.
-TODO.md                Ideas and planned work.
+src/ripple-pond.html        The game: one file with styles, markup and script.
+src/privacy.html            Privacy policy page.
+assets/icon.svg             App icon artwork.
+assets/icons/               App icons rendered from icon.svg (scripts/make_icons.py).
+assets/screenshots/         App store screenshots (scripts/make_screenshots.py).
+assets/fonts/               Bundled fonts (SIL Open Font License).
+scripts/build.mjs           Builds the website into docs/.
+docs/                       The built website, served by GitHub Pages. Do not edit by hand.
+tests/smoke_test.py         Plays every feature and checks install and offline play.
+PUBLISHING.md               How to publish on itch.io, the Microsoft Store and Google Play.
+TODO.md                     Ideas and planned work.
 ```
 
-The source is a page fragment (no `<html>`, `<head>` or `<body>` tags) so the same file can also be published as a Claude artifact. The build script adds the document wrapper.
+The game source is a page fragment (no `<html>`, `<head>` or `<body>` tags) that loads Google Fonts, so the same file can also be published as a Claude artifact. The build wraps it into a complete page, swaps in the bundled fonts, and adds the app manifest and the offline service worker.
 
 ## Making changes
 
 1. Edit `src/ripple-pond.html`.
 2. Build: `node scripts/build.mjs` (Node 18 or newer, no packages needed).
 3. Test: `python tests/smoke_test.py` (first time only: `pip install playwright` and `python -m playwright install chromium`).
-4. Open `dist/index.html` to try it, then commit both the source and `dist/index.html`.
+4. Commit the source and `docs/`, then push. GitHub Pages updates the live site within a minute or two, and installed copies update themselves the next time they open online.
+
+If the icon artwork changes, run `python scripts/make_icons.py`. If the look of the game changes, refresh the store screenshots with `python scripts/make_screenshots.py`, then build again.
 
 ## Technical notes
 
-- Plain HTML, CSS and JavaScript. No frameworks and no dependencies, apart from two Google Fonts (Shippori Mincho and Figtree) with system font fallbacks.
+- Plain HTML, CSS and JavaScript. No frameworks and no runtime dependencies. Fonts: Shippori Mincho and Figtree.
 - The pond is drawn on a 2D canvas. Sound uses the Web Audio API with a generated reverb.
+- Installable web app: a manifest plus a service worker that caches the game for offline play. The cache name is a hash of the files, so every new build replaces the old cache automatically.
 - The animation clock slows down gracefully on slow devices, while the breathing guide and sleep timer use real time so their seconds stay accurate.
 - Respects reduced-motion settings, pauses sound when the tab is hidden, and uses a screen wake lock only during sleep mode.

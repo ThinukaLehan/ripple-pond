@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Ripple Pond app icon. Full-bleed artwork; the koi stays inside the central
+       safe zone so the icon also works as a "maskable" icon on Android. -->
+  <defs>
+    <radialGradient id="water" cx="38%" cy="32%" r="80%">
+      <stop offset="0" stop-color="#5fb2a8"/>
+      <stop offset="0.55" stop-color="#1f6f78"/>
+      <stop offset="1" stop-color="#0a3442"/>
+    </radialGradient>
+    <clipPath id="koiBody">
+      <path d="M100 0 C95 -30 40 -42 -20 -34 C-60 -28 -90 -12 -112 0 C-90 12 -60 28 -20 34 C40 42 95 30 100 0 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#water)"/>
+
+  <!-- ripples -->
+  <g fill="none" stroke="#ffffff" stroke-linecap="round">
+    <circle cx="256" cy="256" r="168" stroke-opacity="0.32" stroke-width="5"/>
+    <circle cx="256" cy="256" r="212" stroke-opacity="0.2" stroke-width="5"/>
+    <circle cx="256" cy="256" r="254" stroke-opacity="0.12" stroke-width="5"/>
+  </g>
+
+  <!-- koi -->
+  <g transform="translate(262 252) rotate(-32)">
+    <!-- shadow -->
+    <g transform="translate(10 16)" fill="#002028" fill-opacity="0.28">
+      <path d="M100 0 C95 -30 40 -42 -20 -34 C-60 -28 -90 -12 -112 0 C-90 12 -60 28 -20 34 C40 42 95 30 100 0 Z"/>
+      <path d="M-106 0 C-128 -10 -146 -38 -162 -48 C-154 -20 -154 20 -162 48 C-146 38 -128 10 -106 0 Z"/>
+    </g>
+    <!-- tail and fins -->
+    <g fill="#fbf5ee" fill-opacity="0.78">
+      <path d="M-106 0 C-128 -10 -146 -38 -162 -48 C-154 -20 -154 20 -162 48 C-146 38 -128 10 -106 0 Z"/>
+      <ellipse cx="46" cy="-40" rx="26" ry="11" transform="rotate(-38 46 -40)"/>
+      <ellipse cx="46" cy="40" rx="26" ry="11" transform="rotate(38 46 40)"/>
+    </g>
+    <!-- body -->
+    <path d="M100 0 C95 -30 40 -42 -20 -34 C-60 -28 -90 -12 -112 0 C-90 12 -60 28 -20 34 C40 42 95 30 100 0 Z" fill="#fbf5ee"/>
+    <!-- markings -->
+    <g clip-path="url(#koiBody)" fill="#e2502c">
+      <circle cx="70" cy="-6" r="24"/>
+      <circle cx="8" cy="18" r="28"/>
+      <circle cx="-52" cy="-14" r="22"/>
+    </g>
+    <!-- sheen -->
+    <path d="M86 -4 C40 -14 -30 -14 -92 -4" fill="none" stroke="#ffffff" stroke-opacity="0.35" stroke-width="5" stroke-linecap="round"/>
+    <!-- eyes -->
+    <circle cx="80" cy="-17" r="4.5" fill="#1d1715"/>
+    <circle cx="80" cy="17" r="4.5" fill="#1d1715"/>
+  </g>
+</svg>

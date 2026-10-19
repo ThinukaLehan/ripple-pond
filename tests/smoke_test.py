@@ -1,8 +1,9 @@
 """Smoke test for Ripple Pond.
 
-Plays through every feature in headless Chromium at phone and desktop sizes and
-fails if anything breaks or the page logs an error. Screenshots are saved to
-tests/output/ so you can look at the results.
+Serves the built website (docs/) from a local web server, plays through every
+feature in headless Chromium at phone and desktop sizes, and checks that the game
+installs as an app and works offline. Fails if anything breaks or the page logs
+an error. Screenshots are saved to tests/output/ so you can look at the results.
 
 Setup (once):
     pip install playwright
@@ -11,18 +12,25 @@ Setup (once):
 Run (after `node scripts/build.mjs`):
     python tests/smoke_test.py
 
-The test works on a copy of dist/index.html with two test-only changes:
-the sleep timer runs fast (1 "minute" = 0.2 s) and the pond's state is exposed
-on window.__t so the test can find the frog and check the koi and food.
+The feature test uses test-page.html, a copy of index.html with two test-only
+changes: the sleep timer runs fast (1 "minute" = 0.2 s) and the pond's state is
+exposed on window.__t so the test can find the frog and check the koi and food.
+The install/offline test uses the real index.html.
 """
 import asyncio
+import functools
+import http.server
+import json
 import pathlib
+import shutil
 import sys
+import threading
 
 from playwright.async_api import async_playwright
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "tests" / "output"
+SITE = OUT / "site"
 FAILURES = []
 
 
@@ -32,36 +40,56 @@ def check(label, ok, detail=""):
         FAILURES.append(label)
 
 
-def make_test_page():
-    html = (ROOT / "dist" / "index.html").read_text(encoding="utf-8")
+def make_site():
+    """Copy docs/ to tests/output/site/ and add test-page.html next to index.html."""
+    docs = ROOT / "docs"
+    if not (docs / "index.html").exists():
+        sys.exit("Test setup failed: docs/index.html not found. Run: node scripts/build.mjs")
+    html = (docs / "index.html").read_text(encoding="utf-8")
     for needle in ("const SLEEP_SECS_PER_MIN = 60;", "initFrog();\n"):
         if needle not in html:
-            sys.exit(f"Test setup failed: '{needle.strip()}' not found in dist/index.html. Run the build first.")
+            sys.exit(f"Test setup failed: '{needle.strip()}' not found in docs/index.html.")
     html = html.replace("const SLEEP_SECS_PER_MIN = 60;", "const SLEEP_SECS_PER_MIN = 0.2;")
     html = html.replace(
         "initFrog();\n",
         "initFrog();\nwindow.__t = { frog, dfly, food, sleep, koi, pads, breath, boats };\n",
         1,
     )
-    OUT.mkdir(parents=True, exist_ok=True)
-    page = OUT / "test-page.html"
-    page.write_text(html, encoding="utf-8")
-    return page
+    shutil.rmtree(SITE, ignore_errors=True)
+    shutil.copytree(docs, SITE)
+    (SITE / "test-page.html").write_text(html, encoding="utf-8")
+
+
+def start_server():
+    """Serve tests/output/site on a free localhost port (localhost allows service workers)."""
+    class Quiet(http.server.SimpleHTTPRequestHandler):
+        extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map,
+                          ".webmanifest": "application/manifest+json", ".woff2": "font/woff2", ".js": "text/javascript"}
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Quiet, directory=str(SITE)))
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    return server, f"http://127.0.0.1:{server.server_address[1]}/"
 
 
 async def main():
-    page_file = make_test_page()
+    make_site()
+    server, base = start_server()
     errors = []
     async with async_playwright() as p:
         browser = await p.chromium.launch(args=["--autoplay-policy=no-user-gesture-required"])
 
-        async def open_page(name, viewport):
-            pg = await browser.new_page(viewport=viewport)
-            # Font downloads may fail in offline test environments; that is not a game error.
-            pg.on("console", lambda m: errors.append((name, m.text))
-                  if m.type == "error" and "Failed to load resource" not in m.text else None)
+        def watch(pg, name):
+            pg.on("console", lambda m: errors.append((name, m.text)) if m.type == "error" else None)
             pg.on("pageerror", lambda e: errors.append((name, str(e))))
-            await pg.goto(page_file.as_uri())
+
+        async def open_page(name, viewport):
+            ctx = await browser.new_context(viewport=viewport, service_workers="block")
+            pg = await ctx.new_page()
+            watch(pg, name)
+            await pg.goto(base + "test-page.html")
             await pg.wait_for_timeout(600)
             return pg
 
@@ -156,7 +184,53 @@ async def main():
         await ph.wait_for_timeout(300)
         check("Wake up brings the controls back", not await js(ph, "document.body.classList.contains('sleeping')"))
 
+        # ---------- Installable app and offline play ----------
+        print("Installable app and offline play")
+        ctx = await browser.new_context(viewport={"width": 390, "height": 844})
+        app = await ctx.new_page()
+        watch(app, "app")
+        await app.goto(base)
+        await app.wait_for_timeout(500)
+
+        manifest_href = await js(app, "document.querySelector('link[rel=manifest]')?.getAttribute('href')")
+        check("Page links a web app manifest", manifest_href == "manifest.webmanifest", manifest_href)
+        manifest = json.loads((SITE / "manifest.webmanifest").read_text(encoding="utf-8"))
+        check("Manifest has the name, start page and standalone display",
+              manifest.get("name") == "Ripple Pond" and manifest.get("start_url") == "./" and manifest.get("display") == "standalone")
+        sizes = {(i["sizes"], i.get("purpose", "any")) for i in manifest.get("icons", [])}
+        check("Manifest has 192 and 512 icons, normal and maskable",
+              {("192x192", "any"), ("512x512", "any"), ("192x192", "maskable"), ("512x512", "maskable")} <= sizes)
+        files = [i["src"] for i in manifest["icons"]] + [s["src"] for s in manifest.get("screenshots", [])]
+        missing = [f for f in files if not (SITE / f).exists()]
+        check("Every icon and screenshot in the manifest exists", not missing, missing)
+
+        scope = await js(app, "navigator.serviceWorker.ready.then(r => r.scope)")
+        check("Offline service worker installs", scope == base, scope)
+        await app.reload()
+        await app.wait_for_timeout(500)
+        check("Service worker controls the page", await js(app, "!!navigator.serviceWorker.controller"))
+        await js(app, "document.fonts.ready")
+        check("Bundled fonts load (no Google Fonts needed)",
+              await js(app, "document.fonts.check('600 20px \"Shippori Mincho\"') && document.fonts.check('500 14px Figtree')"))
+        google = await js(app, "performance.getEntriesByType('resource').filter(e => /fonts\\.(googleapis|gstatic)/.test(e.name)).length")
+        check("Nothing is loaded from other websites", google == 0, google)
+
+        await ctx.set_offline(True)
+        await app.reload()
+        await app.wait_for_timeout(800)
+        check("Game opens with no internet connection",
+              await js(app, "document.title") == "Ripple Pond" and await js(app, "!!document.querySelector('#pond')"))
+        await app.mouse.click(195, 400)
+        await app.wait_for_timeout(300)
+        check("Game is playable offline", await js(app, "document.querySelector('#hint').classList.contains('gone')"))
+        await app.screenshot(path=str(OUT / "phone-offline.png"))
+        await app.goto(base + "privacy.html")
+        check("Privacy page opens offline", "Privacy Policy" in (await js(app, "document.title")))
+        await ctx.set_offline(False)
+        await ctx.close()
+
         await browser.close()
+    server.shutdown()
 
     check("No errors in the browser console", not errors, errors)
     print()

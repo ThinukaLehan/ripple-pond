@@ -1,5 +1,8 @@
-# Test output (screenshots and the temporary test page)
+# Test output (screenshots and the temporary test site)
 tests/output/
+
+# Store packages (built by scripts/package_itch.py and PWABuilder)
+release/
 
 # Python
 __pycache__/
