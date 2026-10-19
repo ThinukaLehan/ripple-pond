@@ -1,0 +1,15 @@
+# Test output (screenshots and the temporary test page)
+tests/output/
+
+# Python
+__pycache__/
+*.pyc
+
+# Node
+node_modules/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
